@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List with Input Persistence</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .delete-btn {
+            background-color: #ff6b6b;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <form id="todo-form">
+            <input type="text" id="todo-input" placeholder="Add a new task" required>
+            <button type="submit">Add</button>
+        </form>
+        <ul id="todo-list"></ul>
+    </div>
+
+    <script>
+        const todoForm = document.getElementById("todo-form");
+        const todoInput = document.getElementById("todo-input");
+        const todoList = document.getElementById("todo-list");
+
+        // Function to save input data to localStorage
+        function saveTasksToLocalStorage(tasks) {
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        // Function to retrieve input data from localStorage
+        function getTasksFromLocalStorage() {
+            const tasks = localStorage.getItem("tasks");
+            return tasks ? JSON.parse(tasks) : [];
+        }
+
+        // Function to render tasks
+        function renderTasks() {
+            todoList.innerHTML = "";
+            const tasks = getTasksFromLocalStorage();
+            tasks.forEach((taskText) => {
+                const listItem = document.createElement("li");
+                listItem.innerHTML = `
+                    <span>${taskText}</span>
+                    <button class="delete-btn">Delete</button>
+                `;
+                todoList.appendChild(listItem);
+
+                const deleteBtn = listItem.querySelector(".delete-btn");
+                deleteBtn.addEventListener("click", function () {
+                    const updatedTasks = getTasksFromLocalStorage().filter(
+                        (task) => task !== taskText
+                    );
+                    saveTasksToLocalStorage(updatedTasks);
+                    renderTasks();
+                });
+            });
+        }
+
+        // Add event listener to form submission
+        todoForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const taskText = todoInput.value.trim();
+            if (taskText !== "") {
+                const tasks = getTasksFromLocalStorage();
+                tasks.push(taskText);
+                saveTasksToLocalStorage(tasks);
+                renderTasks();
+                todoInput.value = "";
+            }
+        });
+
+        // Initialize tasks on page load
+        renderTasks();
+    </script>
+</body>
+</html>
